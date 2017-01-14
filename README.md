@@ -1,7 +1,7 @@
 Typed Arrays for PHP
 ====================
 
-[`ajf/typed-arrays`](https://packagist.org/packages/ajf/typed-arrays) is a Composer package which implements the Khronos Group [Typed Array Specification](https://www.khronos.org/registry/typedarray/specs/latest/) in PHP 7.
+[`ajf/typed-arrays`](https://packagist.org/packages/ajf/typed-arrays) is a Composer package which implements [ECMAScript Typed Arrays](http://www.ecma-international.org/ecma-262/6.0/#sec-typedarray-objects) (previously a Khronos Group standard) for PHP 7.
 
 Why would you want this? For reduced memory usage, of course!
 
