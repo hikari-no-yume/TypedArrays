@@ -37,6 +37,4 @@ Require `ajf/typed-arrays` in composer. Note that only `dev-master` exists for n
 
 ###Developer
 
-Because this uses PHP 7, you'll need to use `--ignore-platform-reqs` with `composer install` for the time being.
-
 Tests can be run with `phpunit`.
