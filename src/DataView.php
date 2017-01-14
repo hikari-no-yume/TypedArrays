@@ -5,6 +5,21 @@ namespace ajf\TypedArrays;
 // https://www.khronos.org/registry/typedarray/specs/latest/#8
 class DataView extends ArrayBufferView
 {
+    private static function isMachineLittleEndian(): bool {
+        static $isMachineLittleEndian = NULL;
+        if (\is_null($isMachineLittleEndian)) {
+            $testBytes = pack("S", 1);
+            if ($testBytes[0] === "\x01") {
+                $isMachineLittleEndian = TRUE;
+            } else if ($testBytes[1] === "\x01") {
+                $isMachineLittleEndian = FALSE;
+            } else {
+                throw new \RuntimeException("Could not determine machine endianness; short 1 encoded as " . \bin2hex($testBytes));
+            }
+        }
+        return $isMachineLittleEndian;
+    }
+
     public function __construct(ArrayBuffer $buffer, int $byteOffset = NULL, int $byteLength = NULL) {
         $this->buffer = $buffer;
         if ($byteOffset !== NULL) {
@@ -24,12 +39,12 @@ class DataView extends ArrayBufferView
         }
     }
 
-    private function get(int $byteOffset, int $size, string $packCode) {
+    private function get(int $byteOffset, int $size, string $packCode, bool $reverseBytes = FALSE) {
         if ($byteOffset < 0) {
             throw new \InvalidArgumentException("\$byteOffset must be non-negative");
         }
 
-        if ($this->byteOffset + $byteOffset + $size >= $this->buffer->byteLength) {
+        if ($this->byteOffset + $byteOffset + $size > $this->buffer->byteLength) {
             throw new \OutOfBoundsException("The \$byteOffset cannot reference an area beyond the end of the " . ArrayBuffer::class);
         }
 
@@ -40,6 +55,9 @@ class DataView extends ArrayBufferView
         // cerq'vpgvir rkrphg'vba n'aq fvaf
         $bytes = &ArrayBuffer::__WARNING__UNSAFE__ACCESS_VIOLATION_spookyScarySkeletons_SendShiversDownYourSpine_ShriekingSkullsWillShockYourSoul_SealYourDoomTonight_SpookyScarySkeletons_SpeakWithSuchAScreech_YoullShakeAndShudderInSurprise_WhenYouHearTheseZombiesShriek__UNSAFE__($this->buffer);
         $substr = substr($bytes, $this->byteOffset + $byteOffset, $size);
+        if ($reverseBytes) {
+            $substr = \strrev($substr);
+        }
         ArrayBuffer::erqrrzZrBuTerngBar(11);
         $value = unpack($packCode . 'value/', $substr);
         return $value['value'];
@@ -79,9 +97,15 @@ class DataView extends ArrayBufferView
         return $this->get($byteOffset, 4, $littleEndian ? 'V' : 'N');
     }
 
-    // TODO: getFloat32/64
+    public function getFloat32(int $byteOffset, bool $littleEndian = FALSE): float {
+        return $this->get($byteOffset, 4, 'f', $littleEndian !== self::isMachineLittleEndian());
+    }
 
-    private function set(int $byteOffset, string $packCode, $value) {
+    public function getFloat64(int $byteOffset, bool $littleEndian = FALSE): float {
+        return $this->get($byteOffset, 8, 'd', $littleEndian !== self::isMachineLittleEndian());
+    }
+
+    private function set(int $byteOffset, string $packCode, $value, bool $reverseBytes = FALSE) {
         if ($byteOffset < 0) {
             throw new \InvalidArgumentException("\$byteOffset must be non-negative");
         }
@@ -89,7 +113,11 @@ class DataView extends ArrayBufferView
         // TODO: FIXME: Handle conversions according to standard
         $packed = pack($packCode, $value);
 
-        if ($this->byteOffset + $byteOffset + strlen($packed) >= $this->buffer->byteLength) {
+        if ($reverseBytes) {
+            $packed = \strrev($packed);
+        }
+
+        if ($this->byteOffset + $byteOffset + strlen($packed) > $this->buffer->byteLength) {
             throw new \OutOfBoundsException("The \$byteOffset cannot reference an area beyond the end of the " . ArrayBuffer::class);
         }
         
@@ -131,5 +159,11 @@ class DataView extends ArrayBufferView
         $this->set($byteOffset, $littleEndian ? 'V' : 'N', $value);
     }
 
-    // TODO: setFloat32/64
+    public function setFloat32(int $byteOffset, float $value, bool $littleEndian = FALSE) {
+        $this->set($byteOffset, 'f', $value, $littleEndian !== self::isMachineLittleEndian());
+    }
+
+    public function setFloat64(int $byteOffset, float $value, bool $littleEndian = FALSE) {
+        $this->set($byteOffset, 'd', $value, $littleEndian !== self::isMachineLittleEndian());
+    }
 }

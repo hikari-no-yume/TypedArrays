@@ -16,7 +16,6 @@ What's supported
 What's not (yet) supported
 --------------------------
 
-* `DataView::getFloat32`/`64`, `DataView::setFloat32`/`64`
 * [Correct type conversion rules](https://www.khronos.org/registry/typedarray/specs/latest/#3)
 * [`Transferable`](https://www.khronos.org/registry/typedarray/specs/latest/#9) (useless in the context of PHP)
 * 32-bit platforms
